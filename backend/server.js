@@ -54,7 +54,8 @@ app.use((req, res) => {
 const PORT       = process.env.PORT || 5000;
 // const MONGODB_URI = process.env.MONGODB_URI;
 // const MONGODB_URI = process.env.MONGO_URI;
-const MONGODB_URI = process.env.MONGODB_URI;
+// const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://sana952205_db_user:studybot123@cluster0.ckwlhkt.mongodb.net/brainforge?retryWrites=true&w=majority";
 
 mongoose
   .connect(MONGODB_URI)
