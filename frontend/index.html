@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrainForge — Academic AI Companion</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<div class="app-wrapper">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+
+    <div class="sidebar-logo">
+      <div class="logo-mark">BF</div>
+      <div class="logo-text">Brain<span>Forge</span></div>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-btn active" onclick="switchTab('chat', this)">
+        <span class="nav-icon">◈</span> Chat
+      </button>
+      <button class="nav-btn" onclick="switchTab('quiz', this)">
+        <span class="nav-icon">◉</span> Quiz Arena
+      </button>
+    </div>
+
+    <button class="new-chat-btn" onclick="newChat()">
+      <span>+</span> New Session
+    </button>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-label">Subjects</div>
+    <div class="topic-chips">
+      <div class="topic-chip" onclick="useSuggestion('Help me understand the Pythagorean theorem with examples.')"><span>01</span> Mathematics</div>
+      <div class="topic-chip" onclick="useSuggestion('Explain Newton\'s laws of motion simply.')"><span>02</span> Physics</div>
+      <div class="topic-chip" onclick="useSuggestion('What is photosynthesis and how does it work?')"><span>03</span> Biology</div>
+      <div class="topic-chip" onclick="useSuggestion('Explain the causes and effects of World War II.')"><span>04</span> History</div>
+      <div class="topic-chip" onclick="useSuggestion('Help me understand for loops in Python with examples.')"><span>05</span> Programming</div>
+      <div class="topic-chip" onclick="useSuggestion('What are the best study techniques for memorizing fast?')"><span>06</span> Study Tips</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="footer-badge">Powered by LLaMA 3 · Groq</div>
+      <div class="footer-line">Built for serious learners</div>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- ===== MAIN AREA ===== -->
+  <main class="main-area">
+
+    <!-- HEADER -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div class="top-bar-title" id="top-bar-title">
+          <span class="tb-label">Chat</span>
+          <span class="tb-sep">/</span>
+          <span class="tb-sub">Academic Assistant</span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <div class="status-pill"><span class="pulse-dot"></span> Live</div>
+        <button class="icon-btn" onclick="downloadChatPDF()" title="Export PDF">↓ PDF</button>
+      </div>
+    </header>
+
+    <!-- ===== CHAT VIEW ===== -->
+    <div class="view active" id="view-chat">
+      <div class="messages-area" id="messages-area">
+        <div class="welcome-screen" id="welcome-screen">
+          <div class="welcome-eyebrow">Welcome to BrainForge</div>
+          <h1 class="welcome-heading">Your Academic<br><em>AI Companion</em></h1>
+          <p class="welcome-sub">Ask questions, explore concepts, get guided through any subject. From calculus to code, I've got you covered.</p>
+          <div class="suggestion-grid">
+            <div class="suggestion-card" onclick="useSuggestion('Explain the concept of photosynthesis in simple terms.')">
+              <div class="sc-num">01</div>
+              <div class="sc-text">Explain photosynthesis in simple terms</div>
+            </div>
+            <div class="suggestion-card" onclick="useSuggestion('What are the best ways to prepare for an exam?')">
+              <div class="sc-num">02</div>
+              <div class="sc-text">Best exam preparation strategies</div>
+            </div>
+            <div class="suggestion-card" onclick="useSuggestion('Help me understand what a variable is in programming.')">
+              <div class="sc-num">03</div>
+              <div class="sc-text">What is a variable in programming?</div>
+            </div>
+            <div class="suggestion-card" onclick="useSuggestion('Quiz me on the causes of World War I.')">
+              <div class="sc-num">04</div>
+              <div class="sc-text">Quiz me on World War I causes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-dock">
+        <div class="input-frame">
+          <textarea
+            id="user-input"
+            placeholder="Ask anything academic…"
+            rows="1"
+            maxlength="1000"
+          ></textarea>
+          <div class="input-meta">
+            <span class="char-count" id="char-count">0/1000</span>
+            <button id="send-btn" onclick="sendMessage()">Send ↗</button>
+          </div>
+        </div>
+        <p class="input-note">BrainForge focuses on educational content only — Enter to send · Shift+Enter for new line</p>
+      </div>
+    </div>
+
+    <!-- ===== QUIZ VIEW ===== -->
+    <div class="view" id="view-quiz">
+      <div class="quiz-container">
+
+        <!-- Quiz Setup -->
+        <div class="quiz-setup" id="quiz-setup">
+          <div class="quiz-setup-inner">
+            <div class="quiz-eyebrow">Quiz Arena</div>
+            <h2 class="quiz-heading">Test Your Knowledge</h2>
+            <p class="quiz-desc">Configure your quiz and let AI generate personalised questions to challenge and reinforce your learning.</p>
+
+            <div class="quiz-form">
+              <div class="form-row">
+                <label>Subject / Topic</label>
+                <input type="text" id="quiz-topic" placeholder="e.g. Photosynthesis, World War II, Python…" />
+              </div>
+              <div class="form-row two-col">
+                <div>
+                  <label>Difficulty</label>
+                  <select id="quiz-difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+                <div>
+                  <label>No. of Questions</label>
+                  <select id="quiz-count">
+                    <option value="3">3 Questions</option>
+                    <option value="5" selected>5 Questions</option>
+                    <option value="10">10 Questions</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <label>Quiz Format</label>
+                <div class="format-options">
+                  <label class="radio-opt">
+                    <input type="radio" name="quiz-format" value="mcq" checked> Multiple Choice
+                  </label>
+                  <label class="radio-opt">
+                    <input type="radio" name="quiz-format" value="truefalse"> True / False
+                  </label>
+                  <label class="radio-opt">
+                    <input type="radio" name="quiz-format" value="mixed"> Mixed
+                  </label>
+                </div>
+              </div>
+              <button class="start-quiz-btn" onclick="startQuiz()">
+                Generate Quiz →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Active -->
+        <div class="quiz-active" id="quiz-active" style="display:none">
+          <div class="quiz-top-bar">
+            <div class="quiz-progress-wrap">
+              <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+              <span id="quiz-progress-label">Q 1 / 5</span>
+            </div>
+            <div class="quiz-score-badge">Score: <span id="quiz-score">0</span></div>
+          </div>
+
+          <div class="quiz-loading" id="quiz-loading">
+            <div class="loader-ring"></div>
+            <p>Forging your questions…</p>
+          </div>
+
+          <div class="question-card" id="question-card" style="display:none">
+            <div class="q-number" id="q-number">Question 1</div>
+            <div class="q-text" id="q-text"></div>
+            <div class="q-options" id="q-options"></div>
+            <div class="q-feedback" id="q-feedback" style="display:none"></div>
+            <button class="next-btn" id="next-btn" style="display:none" onclick="nextQuestion()">Next →</button>
+          </div>
+        </div>
+
+        <!-- Quiz Results -->
+        <div class="quiz-results" id="quiz-results" style="display:none">
+          <div class="results-inner">
+            <div class="results-icon" id="results-icon">🎯</div>
+            <h2 class="results-heading">Quiz Complete!</h2>
+            <div class="results-score">
+              <span id="final-score">0</span> / <span id="final-total">5</span>
+            </div>
+            <p class="results-msg" id="results-msg"></p>
+            <div class="results-breakdown" id="results-breakdown"></div>
+            <div class="results-actions">
+              <button class="retry-btn" onclick="retryQuiz()">Try Again</button>
+              <button class="new-quiz-btn" onclick="resetQuiz()">New Quiz</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
