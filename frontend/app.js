@@ -1,8 +1,10 @@
 // app.js — BrainForge Frontend Logic
 // ============================================================
 
-const API_BASE_URL = "http://localhost:5000";
-
+const API_BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://tanushabot.onrender.com";
 // ============================================================
 // SESSION
 // ============================================================
